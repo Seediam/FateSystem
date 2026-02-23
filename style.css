@@ -1,247 +1,84 @@
-:root {
-  color-scheme: dark;
-  --bg: #0f1117;
-  --panel: #131825;
-  --panel-2: #182034;
-  --line: #2a3856;
-  --text: #e8eefc;
-  --muted: #8ea2c9;
-
-  --force: #ff4d4d;
-  --magic: #4ea7ff;
-  --agility: #b277ff;
-
-  --fail: #ff4d4d;
-  --common: #f7f7f7;
-  --uncommon: #4ed87a;
-  --critical: #f2c34d;
-
-  --primary: #2b8dff;
-}
-
-* {
-  box-sizing: border-box;
-}
-
 body {
-  margin: 0;
-  font-family: Inter, Segoe UI, Roboto, sans-serif;
-  background: radial-gradient(circle at 0% 0%, #1b2540 0%, var(--bg) 55%);
-  color: var(--text);
+    font-family: Arial, sans-serif;
+    background-color: #222;
+    color: #fff;
+    padding: 15px;
+    margin: 0;
 }
 
-.app {
-  display: grid;
-  gap: 12px;
-  padding: 14px;
+.attr-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: bold;
 }
 
-.panel-header {
-  padding: 8px;
+/* Cores dos Atributos */
+.attr-forca { color: #ff4c4c; } /* Vermelho */
+.attr-magia { color: #4c9aff; } /* Azul */
+.attr-agilidade { color: #b366ff; } /* Roxo */
+
+.controls button {
+    background-color: #444;
+    color: white;
+    border: none;
+    padding: 5px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
 }
 
-h1 {
-  margin: 0;
-  font-size: 22px;
+.controls span {
+    display: inline-block;
+    width: 25px;
+    text-align: center;
 }
 
-h2 {
-  margin: 0;
-  font-size: 17px;
+.roll-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
 }
 
-.subtitle {
-  margin: 6px 0 0;
-  color: var(--muted);
-  font-size: 13px;
+/* Estilo do Popup (Inspirado em caixas de texto limpas/escuras) */
+.popup {
+    display: none;
+    position: fixed;
+    bottom: 10px;
+    left: 5%;
+    width: 90%;
+    background: rgba(15, 15, 20, 0.95);
+    border: 2px solid #555;
+    border-radius: 8px;
+    padding: 15px;
+    box-sizing: border-box;
+    z-index: 1000;
+    box-shadow: 0px 5px 15px rgba(0,0,0,0.8);
 }
 
-.help {
-  margin: 0;
-  color: var(--muted);
-  font-size: 12px;
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
 }
 
-.panel-card {
-  background: linear-gradient(180deg, var(--panel), #0f1524);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 12px;
-  display: grid;
-  gap: 10px;
-}
+.popup-header h3 { margin: 0; font-size: 16px; }
+.popup-header button { background: none; color: white; border: none; font-size: 16px; cursor: pointer; }
 
-.attributes {
-  display: grid;
-  gap: 8px;
-}
-
-.attribute-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
-  align-items: center;
-  padding: 8px;
-  border: 1px solid #24304a;
-  border-radius: 10px;
-  background: #121a2a;
-}
-
-.attribute-name {
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-
-.attribute-name.force { color: var(--force); }
-.attribute-name.magic { color: var(--magic); }
-.attribute-name.agility { color: var(--agility); }
-
-.attribute-left {
-  display: grid;
-  gap: 6px;
-}
-
-.dice-control {
-  display: inline-flex;
-  border: 1px solid #33466c;
-  border-radius: 8px;
-  overflow: hidden;
-  width: fit-content;
-}
-
-.dice-control button,
-.roll-button,
-.close-button,
-.icon-button {
-  border: none;
-  cursor: pointer;
-}
-
-.dice-control button {
-  width: 28px;
-  background: #22314e;
-  color: var(--text);
-  font-size: 17px;
-}
-
-.dice-control output {
-  min-width: 34px;
-  display: grid;
-  place-items: center;
-  background: #16233b;
-  font-weight: 700;
-}
-
-.luck-toggle {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.luck-row {
-  display: grid;
-  gap: 6px;
-}
-
-input[type="number"] {
-  width: 100%;
-  border-radius: 8px;
-  border: 1px solid #2e3d5f;
-  background: #101829;
-  color: var(--text);
-  padding: 9px;
-}
-
-.roll-button,
-.close-button {
-  font-weight: 700;
-  border-radius: 10px;
-  padding: 10px;
-  color: white;
-  background: linear-gradient(180deg, #2d96ff 0%, #1b6fff 100%);
-}
-
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgb(0 0 0 / 52%);
-  display: grid;
-  align-items: center;
-  justify-items: center;
-  padding: 14px;
-}
-
-.hidden { display: none; }
-
-.modal-content {
-  width: min(430px, 100%);
-  border-radius: 14px;
-  border: 1px solid #32486e;
-  background: linear-gradient(180deg, #081325 0%, #07101d 100%);
-  padding: 12px;
-  box-shadow: 0 15px 50px rgb(0 0 0 / 48%);
-  display: grid;
-  gap: 10px;
-}
-
-.modal-header {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-}
-
-.result-meta {
-  color: var(--muted);
-  font-size: 12px;
-  margin-top: 2px;
-}
-
-.icon-button {
-  background: transparent;
-  color: #9db3db;
-  font-size: 18px;
-}
-
-.result-list {
-  display: grid;
-  gap: 7px;
-}
-
-.result-item {
-  border: 1px solid #2a4065;
-  border-radius: 10px;
-  background: #101a2d;
-  padding: 8px;
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.title {
-  font-weight: 700;
-}
-
-.result-item.force .title { color: var(--force); }
-.result-item.magic .title { color: var(--magic); }
-.result-item.agility .title { color: var(--agility); }
-
-.dice-values {
-  text-align: right;
-  font-weight: 700;
-}
-
-.die { margin-left: 5px; }
-.die.fail { color: var(--fail); }
-.die.common { color: var(--common); }
-.die.uncommon { color: var(--uncommon); }
-.die.critical { color: var(--critical); }
-
-.result-total {
-  border-top: 1px solid #253858;
-  padding-top: 8px;
-  text-align: right;
-  font-weight: 800;
-}
+/* Cores dos Resultados dos Dados */
+.res-falha { color: #ff4c4c; font-weight: bold; } /* 1-4: Vermelho */
+.res-comum { color: #ffffff; font-weight: bold; } /* 5-10: Branco */
+.res-incomum { color: #50c878; font-weight: bold; } /* 11-19: Verde */
+.res-critico { color: #ffd700; font-weight: bold; text-shadow: 0 0 8px rgba(255,215,0,0.6); } /* 20: Dourado */
