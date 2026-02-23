@@ -1,14 +1,14 @@
 {
   "name": "Fate Dice Roller",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "manifest_version": 1,
   "author": "FateSystem",
-  "icon": "/icon.svg",
+  "icon": "./icon.svg",
   "description": "Extensão de rolagem de dados para atributos de RPG no Owlbear Rodeo.",
   "action": {
     "title": "Fate Dice Roller",
-    "icon": "/icon.svg",
-    "popover": "/index.html",
+    "icon": "./icon.svg",
+    "popover": "./index.html",
     "height": 700,
     "width": 460
   }
