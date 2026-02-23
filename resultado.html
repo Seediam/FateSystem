@@ -17,23 +17,6 @@
             90% { transform: translate(1px, 2px) rotate(0deg); }
             100% { transform: translate(0px, 0px) rotate(0deg); }
         }
-
-        @keyframes dramatic-lighting {
-            0% { box-shadow: 0 10px 40px rgba(0,0,0,0.9); }
-            50% { box-shadow: 0 0 60px rgba(255, 215, 0, 0.8), inset 0 0 20px rgba(255, 215, 0, 0.3); }
-            100% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
-        }
-
-        .critico-anim {
-            animation: camera-shake 0.4s cubic-bezier(.36,.07,.19,.97) both, dramatic-lighting 1s ease-out forwards;
-            border-color: #ffd700 !important;
-        }
-
-        /* Auras dos Grimórios Elementais */
-        .aura-sangue { box-shadow: 0 0 30px rgba(138, 3, 3, 0.5); border-color: #8a0303; }
-        .aura-vento { box-shadow: 0 0 30px rgba(46, 139, 87, 0.5); border-color: #2e8b57; }
-        .aura-arcano { box-shadow: 0 0 30px rgba(138, 43, 226, 0.5); border-color: #8a2be2; }
-        .aura-musica { box-shadow: 0 0 30px rgba(30, 144, 255, 0.5); border-color: #1e90ff; }
     </style>
 </head>
 <body style="background: transparent; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden;">
@@ -47,6 +30,12 @@
     
     <script type="module">
         import OBR from "https://esm.sh/@owlbear-rodeo/sdk";
+
+        // Converte cor Hex (#ff0000) para RGB (255, 0, 0) para o CSS da luz brilhar
+        function hexToRgb(hex) {
+            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : "255, 215, 0"; // Ouro como falha
+        }
 
         function formatResult(value, sorte) {
             let cor = value <= 4 ? "res-falha" : value <= 11 ? "res-comum" : value <= 19 ? "res-incomum" : "res-critico";
@@ -82,11 +71,30 @@
 
                 const box = document.getElementById("popup-box");
                 
-                // Aplica Ouro/Tremor se houver crítico. Se não houver, aplica a aura do Grimório.
+                // Aplicação da cor do Grimório ou Dourado Padrão
+                let corBase = data.auraColor || "#ffd700";
+                let rgbCor = hexToRgb(corBase);
+
                 if (teveCritico) {
-                    box.classList.add("critico-anim");
-                } else if (data.grimorio && data.grimorio !== "nenhum") {
-                    box.classList.add(`aura-${data.grimorio}`);
+                    // Injeta uma animação de CSS feita na hora com a cor do jogador
+                    const style = document.createElement('style');
+                    style.innerHTML = `
+                        @keyframes dynamic-dramatic {
+                            0% { box-shadow: 0 10px 40px rgba(0,0,0,0.9); }
+                            50% { box-shadow: 0 0 60px rgba(${rgbCor}, 0.8), inset 0 0 20px rgba(${rgbCor}, 0.3); }
+                            100% { box-shadow: 0 0 30px rgba(${rgbCor}, 0.5); }
+                        }
+                        .custom-crit-anim {
+                            animation: camera-shake 0.4s cubic-bezier(.36,.07,.19,.97) both, dynamic-dramatic 1s ease-out forwards;
+                            border-color: ${corBase} !important;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    box.classList.add("custom-crit-anim");
+                } else if (data.auraColor) {
+                    // Se não for crítico, mas tiver aura, aplica um brilho suave constante
+                    box.style.boxShadow = `0 0 30px rgba(${rgbCor}, 0.3)`;
+                    box.style.borderColor = corBase;
                 }
             }
 
