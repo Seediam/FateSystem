@@ -8,7 +8,7 @@
   "action": {
     "title": "Fate Dice Roller",
     "icon": "./icon.svg",
-    "popover": "./index.html",
+    "popover": "https://github.com/Seediam/FateSystem/blob/main/index.html",
     "height": 700,
     "width": 460
   }
