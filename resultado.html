@@ -3,9 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Animação Dramática de CG para Acertos Críticos */
+        @keyframes camera-shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-2px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(0px, 0px) rotate(0deg); }
+        }
+
+        @keyframes dramatic-lighting {
+            0% { box-shadow: 0 10px 40px rgba(0,0,0,0.9); }
+            50% { box-shadow: 0 0 60px rgba(255, 215, 0, 0.8), inset 0 0 20px rgba(255, 215, 0, 0.3); }
+            100% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
+        }
+
+        .critico-anim {
+            animation: camera-shake 0.4s cubic-bezier(.36,.07,.19,.97) both, dramatic-lighting 1s ease-out forwards;
+            border-color: #ffd700 !important;
+        }
+    </style>
 </head>
 <body style="background: transparent; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden;">
-    <div class="popup" style="display: block; position: relative; width: 90%; max-width: 400px; bottom: auto; left: auto; background: rgba(15, 15, 20, 0.98); box-shadow: 0 10px 40px rgba(0,0,0,0.9); border: 2px solid #555; padding: 20px; border-radius: 8px;">
+    
+    <audio id="som-dado" src="dado.mp3" preload="auto"></audio>
+    <audio id="som-critico" src="critico.mp3" preload="auto"></audio>
+
+    <div id="popup-box" class="popup" style="display: block; position: relative; width: 90%; max-width: 400px; bottom: auto; left: auto; background: rgba(15, 15, 20, 0.98); box-shadow: 0 10px 40px rgba(0,0,0,0.9); border: 2px solid #555; padding: 20px; border-radius: 8px;">
         <div class="popup-header" style="justify-content: center; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 15px;">
             <h3 id="popup-title" style="color: #fff; font-size: 18px; margin: 0; text-transform: uppercase;">Resultado</h3>
         </div>
@@ -30,12 +61,31 @@
                 document.getElementById("popup-title").innerText = `Rolagem de ${data.playerName}`;
                 
                 let parts = [];
-                // Usando texto colorido em vez de bolinhas
-                if (data.results.forca.length > 0) parts.push(`<span class="attr-forca">Força:</span> ${data.results.forca.map(v => formatResult(v, data.sorteUsada)).join(", ")}`);
-                if (data.results.magia.length > 0) parts.push(`<span class="attr-magia">Magia:</span> ${data.results.magia.map(v => formatResult(v, data.sorteUsada)).join(", ")}`);
-                if (data.results.agilidade.length > 0) parts.push(`<span class="attr-agilidade">Agilidade:</span> ${data.results.agilidade.map(v => formatResult(v, data.sorteUsada)).join(", ")}`);
+                let teveCritico = false;
+
+                // Função auxiliar para processar a rolagem e checar críticos
+                const processarAtributo = (array, nome, classeCSS) => {
+                    if (array.length > 0) {
+                        parts.push(`<span class="${classeCSS}">${nome}:</span> ` + array.map(v => {
+                            if (v >= 20) teveCritico = true;
+                            return formatResult(v, data.sorteUsada);
+                        }).join(", "));
+                    }
+                };
+
+                processarAtributo(data.results.forca, "Força", "attr-forca");
+                processarAtributo(data.results.magia, "Magia", "attr-magia");
+                processarAtributo(data.results.agilidade, "Agilidade", "attr-agilidade");
                 
                 document.getElementById("popup-content").innerHTML = parts.join(" <br><br> ");
+
+                // Aplica a animação dramática e toca o som correspondente
+                if (teveCritico) {
+                    document.getElementById("popup-box").classList.add("critico-anim");
+                    document.getElementById("som-critico").play().catch(e => console.log("Áudio bloqueado pelo navegador"));
+                } else {
+                    document.getElementById("som-dado").play().catch(e => console.log("Áudio bloqueado pelo navegador"));
+                }
             }
 
             setTimeout(() => { OBR.modal.close("resultado-modal"); }, 6000);
