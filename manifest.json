@@ -4,8 +4,8 @@
   "manifest_version": 1,
   "action": {
     "title": "FateSystem",
-    "icon": "/icon.svg",
-    "popover": "/",
+    "icon": "icon.svg",
+    "popover": "index.html",
     "width": 350,
     "height": 500
   }
