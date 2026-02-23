@@ -1,0 +1,199 @@
+:root {
+  color-scheme: dark;
+  --bg: #1b1f29;
+  --card: #262d3d;
+  --text: #f4f7ff;
+  --muted: #c3ccdf;
+  --border: #3a4360;
+  --force: #ff4d4d;
+  --magic: #51a3ff;
+  --agility: #bf77ff;
+  --fail: #ff4d4d;
+  --common: #f8f8f8;
+  --uncommon: #5de37d;
+  --critical: #f6c445;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, Segoe UI, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.app {
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--muted);
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.attributes {
+  display: grid;
+  gap: 8px;
+}
+
+.attribute-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.attribute-name {
+  font-weight: 700;
+}
+
+.attribute-name.force { color: var(--force); }
+.attribute-name.magic { color: var(--magic); }
+.attribute-name.agility { color: var(--agility); }
+
+.dice-control {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.dice-control button,
+.icon-button,
+.roll-button {
+  border: none;
+  cursor: pointer;
+}
+
+.dice-control button {
+  background: #323a4f;
+  color: var(--text);
+  width: 30px;
+  font-size: 18px;
+}
+
+.dice-control output {
+  min-width: 34px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  background: #202638;
+}
+
+.luck-toggle {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.luck-row {
+  display: grid;
+  gap: 8px;
+}
+
+input[type="number"] {
+  width: 100%;
+  background: #202638;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.roll-button {
+  background: linear-gradient(135deg, #546eff, #6a5acd);
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 58%);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.hidden {
+  display: none;
+}
+
+.modal-content {
+  width: min(560px, 100%);
+  background: #101521;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.icon-button {
+  background: transparent;
+  color: var(--text);
+  font-size: 20px;
+}
+
+.result-meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.result-list {
+  display: grid;
+  gap: 8px;
+}
+
+.result-item {
+  background: #1b2234;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.result-item .title {
+  font-weight: 700;
+}
+
+.result-item.force .title { color: var(--force); }
+.result-item.magic .title { color: var(--magic); }
+.result-item.agility .title { color: var(--agility); }
+
+.die {
+  display: inline-block;
+  margin-right: 6px;
+  font-weight: 800;
+}
+
+.die.fail { color: var(--fail); }
+.die.common { color: var(--common); }
+.die.uncommon { color: var(--uncommon); }
+.die.critical { color: var(--critical); }
