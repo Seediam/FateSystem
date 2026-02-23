@@ -5,18 +5,18 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body style="background: transparent; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden;">
-    <div class="popup" style="display: block; position: relative; width: 90%; max-width: 400px; bottom: auto; left: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.9); border: 2px solid #555;">
-        <div class="popup-header" style="justify-content: center; border-bottom: 1px solid #444; padding-bottom: 10px;">
+    <div class="popup" style="display: block; position: relative; width: 90%; max-width: 400px; bottom: auto; left: auto; background: rgba(15, 15, 20, 0.98); box-shadow: 0 10px 40px rgba(0,0,0,0.9); border: 2px solid #555; padding: 20px; border-radius: 8px;">
+        <div class="popup-header" style="justify-content: center; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 15px;">
             <h3 id="popup-title" style="color: #fff; font-size: 18px; margin: 0; text-transform: uppercase;">Resultado</h3>
         </div>
-        <div id="popup-content" style="font-size: 22px; text-align: center; margin-top: 15px;"></div>
+        <div id="popup-content" style="font-size: 20px; text-align: left; margin-top: 15px; font-weight: bold;"></div>
     </div>
     
     <script type="module">
         import OBR from "https://esm.sh/@owlbear-rodeo/sdk";
 
         function formatResult(value, sorte) {
-            let cor = value <= 4 ? "res-falha" : value <= 10 ? "res-comum" : value <= 19 ? "res-incomum" : "res-critico";
+            let cor = value <= 4 ? "res-falha" : value <= 11 ? "res-comum" : value <= 19 ? "res-incomum" : "res-critico";
             let sorteHtml = sorte > 0 ? `<sup class="sorte-mod">${sorte}</sup>` : "";
             return `<span class="${cor}">${value}</span>${sorteHtml}`;
         }
@@ -30,14 +30,14 @@
                 document.getElementById("popup-title").innerText = `Rolagem de ${data.playerName}`;
                 
                 let parts = [];
-                if (data.results.forca.length > 0) parts.push(`🔴 ${data.results.forca.map(v => formatResult(v, data.sorteUsada)).join(", ")}`);
-                if (data.results.magia.length > 0) parts.push(`🔵 ${data.results.magia.map(v => formatResult(v, data.sorteUsada)).join(", ")}`);
-                if (data.results.agilidade.length > 0) parts.push(`🟣 ${data.results.agilidade.map(v => formatResult(v, data.sorteUsada)).join(", ")}`);
+                // Usando texto colorido em vez de bolinhas
+                if (data.results.forca.length > 0) parts.push(`<span class="attr-forca">Força:</span> ${data.results.forca.map(v => formatResult(v, data.sorteUsada)).join(", ")}`);
+                if (data.results.magia.length > 0) parts.push(`<span class="attr-magia">Magia:</span> ${data.results.magia.map(v => formatResult(v, data.sorteUsada)).join(", ")}`);
+                if (data.results.agilidade.length > 0) parts.push(`<span class="attr-agilidade">Agilidade:</span> ${data.results.agilidade.map(v => formatResult(v, data.sorteUsada)).join(", ")}`);
                 
                 document.getElementById("popup-content").innerHTML = parts.join(" <br><br> ");
             }
 
-            // Fecha a janela sozinha após 6 segundos
             setTimeout(() => { OBR.modal.close("resultado-modal"); }, 6000);
         });
     </script>
