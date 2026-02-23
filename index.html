@@ -47,30 +47,35 @@
             </div>
         </div>
 
-        <div class="attr-row" style="margin-top: 15px;">
-            <span style="font-size: 15px; color: #aaa;">Aura do Grimório</span>
-            <select id="sel-grimorio" style="background: #333; color: white; border: 1px solid #555; padding: 5px; border-radius: 4px; outline: none; cursor: pointer;">
-                <option value="nenhum">Nenhum</option>
-                <option value="sangue">Sangue (Vermelho)</option>
-                <option value="vento">Vento (Verde)</option>
-                <option value="arcano">Arcano (Roxo)</option>
-                <option value="musica">Música (Azul)</option>
+        <div class="grimorio-section">
+            <span class="grimorio-title">Seus Grimórios (Auto-Salvo)</span>
+            <div class="grimorio-creator">
+                <input type="text" id="grim-nome" placeholder="Nome do Elemento" maxlength="20">
+                <input type="color" id="grim-cor" value="#ff0000" title="Cor da Aura">
+                <button onclick="addGrimorio()">+</button>
+            </div>
+            <select id="sel-grimorio">
+                <option value="">Nenhum Grimório Selecionado</option>
             </select>
         </div>
 
         <button id="btn-rolar" class="roll-btn">Rolar Dados</button>
 
-        <div class="historico-header">Histórico da Sessão</div>
+        <div class="historico-header">
+            <span>Histórico da Sessão</span>
+            <button onclick="limparHistorico()" class="btn-lixeira" title="Apagar Histórico">🗑️</button>
+        </div>
         <div id="historico" class="historico-container"></div>
     </div>
 
     <audio id="som-dado" src="dado.mp3" preload="auto"></audio>
     <audio id="som-critico" src="critico.mp3" preload="auto"></audio>
 
-    <script type="module" src="script.js?v=6"></script>
+    <script type="module" src="script.js?v=7"></script>
     <script>
         let counts = { forca: 0, magia: 0, agilidade: 0 };
         let sorte = 0;
+        let grimoires = JSON.parse(localStorage.getItem('fatesystem_grimoires')) || [];
 
         function changeCount(attr, val) {
             counts[attr] = Math.max(0, counts[attr] + val);
@@ -81,6 +86,31 @@
             sorte = Math.max(0, sorte + val);
             document.getElementById('count-sorte').innerText = sorte;
         }
+
+        function renderGrimoires() {
+            const sel = document.getElementById('sel-grimorio');
+            sel.innerHTML = '<option value="">Nenhum Grimório Selecionado</option>';
+            grimoires.forEach((g, index) => {
+                sel.innerHTML += `<option value="${index}">${g.nome}</option>`;
+            });
+        }
+
+        function addGrimorio() {
+            const nome = document.getElementById('grim-nome').value.trim();
+            const cor = document.getElementById('grim-cor').value;
+            if (!nome) return;
+            grimoires.push({ nome, cor });
+            localStorage.setItem('fatesystem_grimoires', JSON.stringify(grimoires));
+            document.getElementById('grim-nome').value = '';
+            renderGrimoires();
+        }
+
+        function limparHistorico() {
+            document.getElementById('historico').innerHTML = '';
+        }
+
+        // Carrega os grimórios salvos ao abrir a ficha
+        renderGrimoires();
     </script>
 </body>
 </html>
