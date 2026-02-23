@@ -47,13 +47,27 @@
             </div>
         </div>
 
+        <div class="attr-row" style="margin-top: 15px;">
+            <span style="font-size: 15px; color: #aaa;">Aura do Grimório</span>
+            <select id="sel-grimorio" style="background: #333; color: white; border: 1px solid #555; padding: 5px; border-radius: 4px; outline: none; cursor: pointer;">
+                <option value="nenhum">Nenhum</option>
+                <option value="sangue">Sangue (Vermelho)</option>
+                <option value="vento">Vento (Verde)</option>
+                <option value="arcano">Arcano (Roxo)</option>
+                <option value="musica">Música (Azul)</option>
+            </select>
+        </div>
+
         <button id="btn-rolar" class="roll-btn">Rolar Dados</button>
 
         <div class="historico-header">Histórico da Sessão</div>
         <div id="historico" class="historico-container"></div>
     </div>
 
-    <script type="module" src="script.js?v=5"></script>
+    <audio id="som-dado" src="dado.mp3" preload="auto"></audio>
+    <audio id="som-critico" src="critico.mp3" preload="auto"></audio>
+
+    <script type="module" src="script.js?v=6"></script>
     <script>
         let counts = { forca: 0, magia: 0, agilidade: 0 };
         let sorte = 0;
