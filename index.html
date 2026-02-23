@@ -48,19 +48,13 @@
         </div>
 
         <button id="btn-rolar" class="roll-btn">Rolar Dados</button>
+
+        <div class="historico-header">Histórico da Sessão</div>
+        <div id="historico" class="historico-container"></div>
     </div>
 
-    <div id="result-popup" class="popup">
-        <div class="popup-header">
-            <h3 id="popup-title">Resultado</h3>
-            <button onclick="closePopup()">X</button>
-        </div>
-        <div id="popup-content"></div>
-    </div>
-
-    <script type="module" src="script.js?v=3"></script>
+    <script type="module" src="script.js?v=4"></script>
     <script>
-        // Funções globais de UI para os botões HTML
         let counts = { forca: 0, magia: 0, agilidade: 0 };
         let sorte = 0;
 
@@ -72,10 +66,6 @@
         function changeSorte(val) {
             sorte = Math.max(0, sorte + val);
             document.getElementById('count-sorte').innerText = sorte;
-        }
-
-        function closePopup() {
-            document.getElementById('result-popup').style.display = 'none';
         }
     </script>
 </body>
