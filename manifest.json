@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "manifest_version": 1,
   "author": "FateSystem",
-  "icon": "./icon.svg",
+  "icon": "https://github.com/Seediam/FateSystem/blob/main/icon.svg",
   "description": "Extensão de rolagem de dados para atributos de RPG no Owlbear Rodeo.",
   "action": {
     "title": "Fate Dice Roller",
