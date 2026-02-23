@@ -6,35 +6,40 @@ function rollD20() {
     return Math.floor(Math.random() * 20) + 1;
 }
 
-function formatResult(value) {
-    if (value <= 4) return `<span class="res-falha">${value}</span>`;
-    if (value >= 5 && value <= 10) return `<span class="res-comum">${value}</span>`;
-    if (value >= 11 && value <= 19) return `<span class="res-incomum">${value}</span>`;
-    return `<span class="res-critico">${value}</span>`;
+function formatResult(value, sorte) {
+    let cor = value <= 4 ? "res-falha" : value <= 10 ? "res-comum" : value <= 19 ? "res-incomum" : "res-critico";
+    let sorteHtml = sorte > 0 ? `<sup class="sorte-mod">${sorte}</sup>` : "";
+    return `<span class="${cor}">${value}</span>${sorteHtml}`;
 }
 
-function displayResults(data) {
-    const popup = document.getElementById("result-popup");
-    const content = document.getElementById("popup-content");
-    document.getElementById("popup-title").innerText = `Rolagem de ${data.playerName}`;
+// 1. Função para adicionar a linha no painel de Histórico
+function addToHistory(data) {
+    const historico = document.getElementById("historico");
+    let parts = [];
+    
+    if (data.results.forca.length > 0) parts.push(`🔴 ${data.results.forca.map(v => formatResult(v, data.sorteUsada)).join(", ")}`);
+    if (data.results.magia.length > 0) parts.push(`🔵 ${data.results.magia.map(v => formatResult(v, data.sorteUsada)).join(", ")}`);
+    if (data.results.agilidade.length > 0) parts.push(`🟣 ${data.results.agilidade.map(v => formatResult(v, data.sorteUsada)).join(", ")}`);
 
-    let html = "";
-    if (data.results.forca.length > 0) {
-        html += `<p><span class="attr-forca">Força:</span> ${data.results.forca.map(formatResult).join(", ")}</p>`;
-    }
-    if (data.results.magia.length > 0) {
-        html += `<p><span class="attr-magia">Magia:</span> ${data.results.magia.map(formatResult).join(", ")}</p>`;
-    }
-    if (data.results.agilidade.length > 0) {
-        html += `<p><span class="attr-agilidade">Agilidade:</span> ${data.results.agilidade.map(formatResult).join(", ")}</p>`;
-    }
+    const entry = document.createElement("div");
+    entry.className = "historico-item";
+    entry.innerHTML = `<strong>(${data.playerName})</strong> = ${parts.join(" | ")}`;
+    
+    // Coloca a rolagem mais recente sempre no topo
+    historico.prepend(entry);
+}
 
-    if (data.sorteUsada > 0) {
-        html += `<p style="font-size: 12px; color: #aaa;">(+${data.sorteUsada} de Sorte adicionada em cada dado)</p>`;
+// 2. Função para explodir o Modal no centro da tela
+function showCenterPopup(data) {
+    if (OBR.isAvailable) {
+        const payloadStr = encodeURIComponent(JSON.stringify(data));
+        OBR.modal.open({
+            id: "resultado-modal",
+            url: `/FateSystem/resultado.html?data=${payloadStr}`,
+            height: 250,
+            width: 450
+        });
     }
-
-    content.innerHTML = html;
-    popup.style.display = "block";
 }
 
 document.getElementById("btn-rolar").addEventListener("click", async () => {
@@ -43,10 +48,7 @@ document.getElementById("btn-rolar").addEventListener("click", async () => {
     const agilidade = parseInt(document.getElementById("count-agilidade").innerText) || 0;
     const sorte = parseInt(document.getElementById("count-sorte").innerText) || 0;
 
-    if (forca === 0 && magia === 0 && agilidade === 0) {
-        alert("Adicione pelo menos 1 dado em algum atributo para rolar!");
-        return; 
-    }
+    if (forca === 0 && magia === 0 && agilidade === 0) return alert("Adicione 1 dado para rolar!");
 
     const results = { forca: [], magia: [], agilidade: [] };
 
@@ -54,37 +56,27 @@ document.getElementById("btn-rolar").addEventListener("click", async () => {
     for (let i = 0; i < magia; i++) results.magia.push(rollD20() + sorte);
     for (let i = 0; i < agilidade; i++) results.agilidade.push(rollD20() + sorte);
 
-    let playerName = "Jogador";
-
-    // Rede de segurança: tenta pegar o nome, se falhar, continua rodando
-    try {
-        if (OBR.isAvailable && OBR.isReady) {
-            playerName = await OBR.player.getName();
-        }
-    } catch (erro) {
-        console.warn("Aviso: Não foi possível ler o nome do jogador.", erro);
-    }
+    let playerName = "Você";
+    try { if (OBR.isAvailable && OBR.isReady) playerName = await OBR.player.getName(); } catch (e) {}
 
     const payload = { playerName, results, sorteUsada: sorte };
 
-    // Mostra na sua tela imediatamente, sem falhas
-    displayResults(payload);
+    // Atualiza sua própria tela
+    addToHistory(payload);
+    showCenterPopup(payload);
 
-    // Rede de segurança: tenta enviar para os outros
+    // Manda pros outros jogadores
     try {
-        if (OBR.isAvailable && OBR.isReady) {
-            OBR.broadcast.sendMessage(CHANNEL_ID, payload);
-        }
-    } catch (erro) {
-        console.warn("Aviso: Falha ao enviar broadcast.", erro);
-    }
+        if (OBR.isAvailable && OBR.isReady) OBR.broadcast.sendMessage(CHANNEL_ID, payload);
+    } catch (e) {}
 });
 
-// Inicialização segura
+// Fica escutando as rolagens dos outros
 if (OBR.isAvailable) {
     OBR.onReady(() => {
         OBR.broadcast.onMessage(CHANNEL_ID, (event) => {
-            displayResults(event.data);
+            addToHistory(event.data);
+            showCenterPopup(event.data);
         });
     });
 }
