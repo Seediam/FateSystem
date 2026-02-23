@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fate Dice Roller</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <h1>Rolagem de Dados - Fate System</h1>
+      <p class="subtitle">Configure os dados por atributo e role para todos os players.</p>
+
+      <section class="card">
+        <h2>Atributos</h2>
+        <div id="attributes" class="attributes"></div>
+      </section>
+
+      <section class="card">
+        <h2>Sorte (sem rolagem)</h2>
+        <p>Defina a quantidade de sorte disponível. Cada uso adiciona +1 ao maior dado do atributo escolhido.</p>
+        <div class="luck-row">
+          <label for="luckPool">Pontos de sorte</label>
+          <input id="luckPool" type="number" min="0" value="0" />
+        </div>
+      </section>
+
+      <button id="rollButton" class="roll-button">Rolar Dados</button>
+    </main>
+
+    <div id="resultModal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Resultados da Rodada</h2>
+          <button id="closeModal" class="icon-button" aria-label="Fechar">✕</button>
+        </div>
+        <div id="resultMeta" class="result-meta"></div>
+        <div id="resultList" class="result-list"></div>
+      </div>
+    </div>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
