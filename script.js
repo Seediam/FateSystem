@@ -6,14 +6,26 @@ function rollD20() {
     return Math.floor(Math.random() * 20) + 1;
 }
 
-// Balanceamento Novo: 1-4, 5-11, 12-19, 20
 function formatResult(value, sorte) {
     let cor = value <= 4 ? "res-falha" : value <= 11 ? "res-comum" : value <= 19 ? "res-incomum" : "res-critico";
     let sorteHtml = sorte > 0 ? `<sup class="sorte-mod">${sorte}</sup>` : "";
     return `<span class="${cor}">${value}</span>${sorteHtml}`;
 }
 
-// Adiciona no painel lateral (Usando Bolinhas para economizar espaço)
+// NOVO: Função que toca o áudio na aba certa
+function tocarSom(resultados) {
+    let teveCritico = false;
+    if (resultados.forca.some(v => v >= 20)) teveCritico = true;
+    if (resultados.magia.some(v => v >= 20)) teveCritico = true;
+    if (resultados.agilidade.some(v => v >= 20)) teveCritico = true;
+
+    const audio = document.getElementById(teveCritico ? "som-critico" : "som-dado");
+    if (audio) {
+        audio.currentTime = 0;
+        audio.play().catch(e => console.log("Áudio bloqueado", e));
+    }
+}
+
 function addToHistory(data) {
     const historico = document.getElementById("historico");
     let parts = [];
@@ -29,7 +41,6 @@ function addToHistory(data) {
     historico.prepend(entry);
 }
 
-// Explode o Modal no meio da tela
 function showCenterPopup(data) {
     if (OBR.isAvailable) {
         const payloadStr = encodeURIComponent(JSON.stringify(data));
@@ -47,6 +58,9 @@ document.getElementById("btn-rolar").addEventListener("click", async () => {
     const magia = parseInt(document.getElementById("count-magia").innerText) || 0;
     const agilidade = parseInt(document.getElementById("count-agilidade").innerText) || 0;
     const sorte = parseInt(document.getElementById("count-sorte").innerText) || 0;
+    
+    // Puxa o grimório selecionado
+    const grimorio = document.getElementById("sel-grimorio").value;
 
     if (forca === 0 && magia === 0 && agilidade === 0) return alert("Adicione 1 dado para rolar!");
 
@@ -59,10 +73,11 @@ document.getElementById("btn-rolar").addEventListener("click", async () => {
     let playerName = "Você";
     try { if (OBR.isAvailable && OBR.isReady) playerName = await OBR.player.getName(); } catch (e) {}
 
-    const payload = { playerName, results, sorteUsada: sorte };
+    const payload = { playerName, results, sorteUsada: sorte, grimorio: grimorio };
 
     addToHistory(payload);
     showCenterPopup(payload);
+    tocarSom(results); // Toca o som localmente!
 
     try {
         if (OBR.isAvailable && OBR.isReady) OBR.broadcast.sendMessage(CHANNEL_ID, payload);
@@ -74,6 +89,7 @@ if (OBR.isAvailable) {
         OBR.broadcast.onMessage(CHANNEL_ID, (event) => {
             addToHistory(event.data);
             showCenterPopup(event.data);
+            tocarSom(event.data.results); // Toca quando recebe rolagem de outro jogador
         });
     });
 }
