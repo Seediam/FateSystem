@@ -1,50 +1,82 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fate Dice Roller</title>
-    <link rel="stylesheet" href="./styles.css?v=1.0.1" />
-  </head>
-  <body>
-    <main class="app">
-      <header class="panel-header">
-        <h1>Rolagem de Dados - Fate System</h1>
-        <p class="subtitle">Configure por atributo e envie para todos os players.</p>
-      </header>
-
-      <section class="panel-card">
-        <h2>Atributos</h2>
-        <div id="attributes" class="attributes"></div>
-      </section>
-
-      <section class="panel-card">
-        <h2>Sorte (sem rolagem)</h2>
-        <p class="help">Cada uso de sorte adiciona +1 ao maior dado do atributo escolhido.</p>
-        <div class="luck-row">
-          <label for="luckPool">Pontos de sorte</label>
-          <input id="luckPool" type="number" min="0" value="0" />
+<head>
+    <meta charset="UTF-8">
+    <title>FateSystem Dice</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <h2>Ficha de Rolagem</h2>
+        
+        <div class="attr-row">
+            <span class="attr-forca">Força</span>
+            <div class="controls">
+                <button onclick="changeCount('forca', -1)">-</button>
+                <span id="count-forca">0</span>
+                <button onclick="changeCount('forca', 1)">+</button>
+            </div>
         </div>
-      </section>
 
-      <button id="rollButton" class="roll-button">Rolar Dados</button>
-    </main>
-
-    <div id="resultModal" class="modal hidden" role="dialog" aria-modal="true">
-      <div class="modal-content">
-        <div class="modal-header">
-          <div>
-            <h2>Resultado da Rolagem</h2>
-            <div id="resultMeta" class="result-meta"></div>
-          </div>
-          <button id="closeModal" class="icon-button" aria-label="Fechar">✕</button>
+        <div class="attr-row">
+            <span class="attr-magia">Magia</span>
+            <div class="controls">
+                <button onclick="changeCount('magia', -1)">-</button>
+                <span id="count-magia">0</span>
+                <button onclick="changeCount('magia', 1)">+</button>
+            </div>
         </div>
-        <div id="resultList" class="result-list"></div>
-        <div id="resultTotal" class="result-total"></div>
-        <button id="closeModalFooter" class="close-button">Fechar</button>
-      </div>
+
+        <div class="attr-row">
+            <span class="attr-agilidade">Agilidade</span>
+            <div class="controls">
+                <button onclick="changeCount('agilidade', -1)">-</button>
+                <span id="count-agilidade">0</span>
+                <button onclick="changeCount('agilidade', 1)">+</button>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="attr-row">
+            <span>Sorte (Modificador)</span>
+            <div class="controls">
+                <button onclick="changeSorte(-1)">-</button>
+                <span id="count-sorte">0</span>
+                <button onclick="changeSorte(1)">+</button>
+            </div>
+        </div>
+
+        <button id="btn-rolar" class="roll-btn">Rolar Dados</button>
     </div>
 
-    <script type="module" src="./main.js?v=1.0.1"></script>
-  </body>
+    <div id="result-popup" class="popup">
+        <div class="popup-header">
+            <h3 id="popup-title">Resultado</h3>
+            <button onclick="closePopup()">X</button>
+        </div>
+        <div id="popup-content"></div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+    <script>
+        // Funções globais de UI para os botões HTML
+        let counts = { forca: 0, magia: 0, agilidade: 0 };
+        let sorte = 0;
+
+        function changeCount(attr, val) {
+            counts[attr] = Math.max(0, counts[attr] + val);
+            document.getElementById(`count-${attr}`).innerText = counts[attr];
+        }
+
+        function changeSorte(val) {
+            sorte = Math.max(0, sorte + val);
+            document.getElementById('count-sorte').innerText = sorte;
+        }
+
+        function closePopup() {
+            document.getElementById('result-popup').style.display = 'none';
+        }
+    </script>
+</body>
 </html>
