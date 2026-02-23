@@ -5,9 +5,8 @@
   "action": {
     "title": "FateSystem",
     "icon": "/icon.svg",
-    "popover": {
-      "width": 350,
-      "height": 500
-    }
+    "popover": "/",
+    "width": 350,
+    "height": 500
   }
 }
