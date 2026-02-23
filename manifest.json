@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "manifest_version": 1,
   "action": {
-    "title": "FateSystem",
+    "title": "Fate:Dados",
     "icon": "/FateSystem/icon.svg",
     "popover": "/FateSystem/index.html",
     "width": 350,
