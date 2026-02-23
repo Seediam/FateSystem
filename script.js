@@ -2,9 +2,7 @@ import OBR from "https://esm.sh/@owlbear-rodeo/sdk";
 
 const CHANNEL_ID = "fatesystem-dice-channel";
 
-function rollD20() {
-    return Math.floor(Math.random() * 20) + 1;
-}
+function rollD20() { return Math.floor(Math.random() * 20) + 1; }
 
 function formatResult(value, sorte) {
     let cor = value <= 4 ? "res-falha" : value <= 11 ? "res-comum" : value <= 19 ? "res-incomum" : "res-critico";
@@ -12,7 +10,6 @@ function formatResult(value, sorte) {
     return `<span class="${cor}">${value}</span>${sorteHtml}`;
 }
 
-// NOVO: Função que toca o áudio na aba certa
 function tocarSom(resultados) {
     let teveCritico = false;
     if (resultados.forca.some(v => v >= 20)) teveCritico = true;
@@ -38,6 +35,11 @@ function addToHistory(data) {
     entry.className = "historico-item";
     entry.innerHTML = `<strong>(${data.playerName})</strong> = ${parts.join(" | ")}`;
     
+    // Mostra se o ataque teve um grimório específico
+    if (data.auraName) {
+        entry.innerHTML += `<div style="font-size: 11px; color: ${data.auraColor}; margin-top: 2px;">Grimório: ${data.auraName}</div>`;
+    }
+
     historico.prepend(entry);
 }
 
@@ -59,13 +61,21 @@ document.getElementById("btn-rolar").addEventListener("click", async () => {
     const agilidade = parseInt(document.getElementById("count-agilidade").innerText) || 0;
     const sorte = parseInt(document.getElementById("count-sorte").innerText) || 0;
     
-    // Puxa o grimório selecionado
-    const grimorio = document.getElementById("sel-grimorio").value;
-
     if (forca === 0 && magia === 0 && agilidade === 0) return alert("Adicione 1 dado para rolar!");
 
-    const results = { forca: [], magia: [], agilidade: [] };
+    // Lê qual grimório e qual cor estão selecionados no momento
+    const selIndex = document.getElementById("sel-grimorio").value;
+    let auraColor = null;
+    let auraName = null;
+    if (selIndex !== "") {
+        const grimoires = JSON.parse(localStorage.getItem('fatesystem_grimoires')) || [];
+        if (grimoires[selIndex]) {
+            auraColor = grimoires[selIndex].cor;
+            auraName = grimoires[selIndex].nome;
+        }
+    }
 
+    const results = { forca: [], magia: [], agilidade: [] };
     for (let i = 0; i < forca; i++) results.forca.push(rollD20() + sorte);
     for (let i = 0; i < magia; i++) results.magia.push(rollD20() + sorte);
     for (let i = 0; i < agilidade; i++) results.agilidade.push(rollD20() + sorte);
@@ -73,11 +83,12 @@ document.getElementById("btn-rolar").addEventListener("click", async () => {
     let playerName = "Você";
     try { if (OBR.isAvailable && OBR.isReady) playerName = await OBR.player.getName(); } catch (e) {}
 
-    const payload = { playerName, results, sorteUsada: sorte, grimorio: grimorio };
+    // Envia as cores personalizadas no pacote
+    const payload = { playerName, results, sorteUsada: sorte, auraColor, auraName };
 
     addToHistory(payload);
     showCenterPopup(payload);
-    tocarSom(results); // Toca o som localmente!
+    tocarSom(results);
 
     try {
         if (OBR.isAvailable && OBR.isReady) OBR.broadcast.sendMessage(CHANNEL_ID, payload);
@@ -89,7 +100,7 @@ if (OBR.isAvailable) {
         OBR.broadcast.onMessage(CHANNEL_ID, (event) => {
             addToHistory(event.data);
             showCenterPopup(event.data);
-            tocarSom(event.data.results); // Toca quando recebe rolagem de outro jogador
+            tocarSom(event.data.results);
         });
     });
 }
