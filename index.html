@@ -8,17 +8,19 @@
   </head>
   <body>
     <main class="app">
-      <h1>Rolagem de Dados - Fate System</h1>
-      <p class="subtitle">Configure os dados por atributo e role para todos os players.</p>
+      <header class="panel-header">
+        <h1>Rolagem de Dados - Fate System</h1>
+        <p class="subtitle">Configure por atributo e envie para todos os players.</p>
+      </header>
 
-      <section class="card">
+      <section class="panel-card">
         <h2>Atributos</h2>
         <div id="attributes" class="attributes"></div>
       </section>
 
-      <section class="card">
+      <section class="panel-card">
         <h2>Sorte (sem rolagem)</h2>
-        <p>Defina a quantidade de sorte disponível. Cada uso adiciona +1 ao maior dado do atributo escolhido.</p>
+        <p class="help">Cada uso de sorte adiciona +1 ao maior dado do atributo escolhido.</p>
         <div class="luck-row">
           <label for="luckPool">Pontos de sorte</label>
           <input id="luckPool" type="number" min="0" value="0" />
@@ -31,11 +33,15 @@
     <div id="resultModal" class="modal hidden" role="dialog" aria-modal="true">
       <div class="modal-content">
         <div class="modal-header">
-          <h2>Resultados da Rodada</h2>
+          <div>
+            <h2>Resultado da Rolagem</h2>
+            <div id="resultMeta" class="result-meta"></div>
+          </div>
           <button id="closeModal" class="icon-button" aria-label="Fechar">✕</button>
         </div>
-        <div id="resultMeta" class="result-meta"></div>
         <div id="resultList" class="result-list"></div>
+        <div id="resultTotal" class="result-total"></div>
+        <button id="closeModalFooter" class="close-button">Fechar</button>
       </div>
     </div>
 
