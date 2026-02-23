@@ -7,7 +7,7 @@ function rollD20() {
     return Math.floor(Math.random() * 20) + 1;
 }
 
-// Formata o número com a cor baseada no valor final (Dado + Sorte)
+// Formata o número com a cor baseada no valor final
 function formatResult(value) {
     if (value <= 4) return `<span class="res-falha">${value}</span>`;
     if (value >= 5 && value <= 10) return `<span class="res-comum">${value}</span>`;
@@ -32,7 +32,6 @@ function displayResults(data) {
         html += `<p><span class="attr-agilidade">Agilidade:</span> ${data.results.agilidade.map(formatResult).join(", ")}</p>`;
     }
 
-    // Informa se sorte foi usada
     if (data.sorteUsada > 0) {
         html += `<p style="font-size: 12px; color: #aaa;">(+${data.sorteUsada} de Sorte adicionada em cada dado)</p>`;
     }
@@ -41,35 +40,47 @@ function displayResults(data) {
     popup.style.display = "block";
 }
 
-OBR.onReady(() => {
-    // Escuta rolagem de outros jogadores na sala
-    OBR.broadcast.onMessage(CHANNEL_ID, (event) => {
-        displayResults(event.data);
-    });
+// Lógica do botão de rolar solta (funciona dentro e fora do Owlbear)
+document.getElementById("btn-rolar").addEventListener("click", async () => {
+    const currentCounts = window.counts; 
+    const currentSorte = window.sorte;
 
-    document.getElementById("btn-rolar").addEventListener("click", async () => {
-        // As variáveis 'counts' e 'sorte' vêm do escopo global do HTML
-        const currentCounts = window.counts; 
-        const currentSorte = window.sorte;
+    // Trava para não rolar vazio
+    if (currentCounts.forca === 0 && currentCounts.magia === 0 && currentCounts.agilidade === 0) {
+        alert("Adicione pelo menos 1 dado em algum atributo para rolar!");
+        return; 
+    }
 
-        if (currentCounts.forca === 0 && currentCounts.magia === 0 && currentCounts.agilidade === 0) {
-            return; // Não rola se não houver dados selecionados
-        }
+    const results = { forca: [], magia: [], agilidade: [] };
 
-        const results = { forca: [], magia: [], agilidade: [] };
+    // Rola os dados e aplica a sorte
+    for (let i = 0; i < currentCounts.forca; i++) results.forca.push(rollD20() + currentSorte);
+    for (let i = 0; i < currentCounts.magia; i++) results.magia.push(rollD20() + currentSorte);
+    for (let i = 0; i < currentCounts.agilidade; i++) results.agilidade.push(rollD20() + currentSorte);
 
-        // Rola os dados e aplica a sorte imediatamente
-        for (let i = 0; i < currentCounts.forca; i++) results.forca.push(rollD20() + currentSorte);
-        for (let i = 0; i < currentCounts.magia; i++) results.magia.push(rollD20() + currentSorte);
-        for (let i = 0; i < currentCounts.agilidade; i++) results.agilidade.push(rollD20() + currentSorte);
+    let playerName = "Você (Teste Local)";
 
-        const playerName = await OBR.player.getName();
-        const payload = { playerName, results, sorteUsada: currentSorte };
+    // Se estiver dentro do Owlbear, pega o nome real do jogador
+    if (OBR.isAvailable) {
+        playerName = await OBR.player.getName();
+    }
 
-        // Mostra para você mesmo
-        displayResults(payload);
+    const payload = { playerName, results, sorteUsada: currentSorte };
 
-        // Envia para os outros jogadores
+    // Mostra o popup na sua própria tela
+    displayResults(payload);
+
+    // Só envia para a rede se estiver dentro do Owlbear
+    if (OBR.isAvailable) {
         OBR.broadcast.sendMessage(CHANNEL_ID, payload);
-    });
+    }
 });
+
+// Inicialização do Owlbear para escutar a rolagem dos OUTROS jogadores
+if (OBR.isAvailable) {
+    OBR.onReady(() => {
+        OBR.broadcast.onMessage(CHANNEL_ID, (event) => {
+            displayResults(event.data);
+        });
+    });
+}
