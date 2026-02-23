@@ -6,13 +6,14 @@ function rollD20() {
     return Math.floor(Math.random() * 20) + 1;
 }
 
+// Balanceamento Novo: 1-4, 5-11, 12-19, 20
 function formatResult(value, sorte) {
-    let cor = value <= 4 ? "res-falha" : value <= 10 ? "res-comum" : value <= 19 ? "res-incomum" : "res-critico";
+    let cor = value <= 4 ? "res-falha" : value <= 11 ? "res-comum" : value <= 19 ? "res-incomum" : "res-critico";
     let sorteHtml = sorte > 0 ? `<sup class="sorte-mod">${sorte}</sup>` : "";
     return `<span class="${cor}">${value}</span>${sorteHtml}`;
 }
 
-// 1. Função para adicionar a linha no painel de Histórico
+// Adiciona no painel lateral (Usando Bolinhas para economizar espaço)
 function addToHistory(data) {
     const historico = document.getElementById("historico");
     let parts = [];
@@ -25,11 +26,10 @@ function addToHistory(data) {
     entry.className = "historico-item";
     entry.innerHTML = `<strong>(${data.playerName})</strong> = ${parts.join(" | ")}`;
     
-    // Coloca a rolagem mais recente sempre no topo
     historico.prepend(entry);
 }
 
-// 2. Função para explodir o Modal no centro da tela
+// Explode o Modal no meio da tela
 function showCenterPopup(data) {
     if (OBR.isAvailable) {
         const payloadStr = encodeURIComponent(JSON.stringify(data));
@@ -61,17 +61,14 @@ document.getElementById("btn-rolar").addEventListener("click", async () => {
 
     const payload = { playerName, results, sorteUsada: sorte };
 
-    // Atualiza sua própria tela
     addToHistory(payload);
     showCenterPopup(payload);
 
-    // Manda pros outros jogadores
     try {
         if (OBR.isAvailable && OBR.isReady) OBR.broadcast.sendMessage(CHANNEL_ID, payload);
     } catch (e) {}
 });
 
-// Fica escutando as rolagens dos outros
 if (OBR.isAvailable) {
     OBR.onReady(() => {
         OBR.broadcast.onMessage(CHANNEL_ID, (event) => {
