@@ -1,3 +1,63 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #222;
+    color: #fff;
+    padding: 15px;
+    margin: 0;
+}
+
+.attr-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.attr-forca { color: #ff4c4c; } /* Vermelho */
+.attr-magia { color: #4c9aff; } /* Azul */
+.attr-agilidade { color: #b366ff; } /* Roxo */
+
+.controls button {
+    background-color: #444;
+    color: white;
+    border: none;
+    padding: 5px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.controls span {
+    display: inline-block;
+    width: 25px;
+    text-align: center;
+}
+
+.roll-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    background-color: #00b359;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.roll-btn:hover {
+    background-color: #00994c;
+}
+
+/* Cores dos Resultados dos Dados (Atualizadas) */
+.res-falha { color: #ff4c4c; font-weight: bold; } /* 1-4: Vermelho */
+.res-comum { color: #ffffff; font-weight: bold; } /* 5-11: Branco */
+.res-incomum { color: #50c878; font-weight: bold; } /* 12-19: Verde */
+.res-critico { color: #ffd700; font-weight: bold; text-shadow: 0 0 8px rgba(255,215,0,0.6); } /* 20: Dourado */
+
 /* Estilos do Histórico e Modificadores */
 .historico-header {
     margin-top: 25px;
@@ -12,10 +72,10 @@
 .historico-container {
     max-height: 180px;
     overflow-y: auto;
-    background: rgba(10, 10, 15, 0.8);
+    background: rgba(15, 15, 20, 0.95);
     padding: 10px;
     border-radius: 5px;
-    border: 1px solid #333;
+    border: 1px solid #444;
 }
 
 .historico-item {
@@ -32,7 +92,6 @@
     padding-bottom: 0;
 }
 
-/* O número sobrescrito verde da sorte */
 .sorte-mod {
     color: #50c878; 
     font-size: 11px;
