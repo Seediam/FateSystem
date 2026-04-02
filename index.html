@@ -112,5 +112,205 @@
         // Carrega os grimórios salvos ao abrir a ficha
         renderGrimoires();
     </script>
+
+    <!-- =====================================================================
+         GAME HUD OVERLAY — Party, Chat, Dice, TBS Battle
+         Requer: socket.io conectado via window.socket (Fate_TBSCore.js)
+         ===================================================================== -->
+
+    <!-- Party HUD -->
+    <div id="party-hud-container" style="display:none; position:fixed; top:10px; left:10px; z-index:1000; background:rgba(0,0,0,0.75); border:1px solid #555; border-radius:6px; padding:8px; min-width:180px; font-size:13px; color:#fff;"></div>
+
+    <!-- Toggle Buttons -->
+    <button id="chat-toggle-btn"  style="display:none; position:fixed; bottom:60px; right:10px; z-index:1001; background:#333; color:#fff; border:1px solid #555; padding:6px 10px; border-radius:4px; cursor:pointer;">💬</button>
+    <button id="dice-toggle-btn"  style="display:none; position:fixed; bottom:10px;  right:10px; z-index:1001; background:#333; color:#fff; border:1px solid #555; padding:6px 10px; border-radius:4px; cursor:pointer;">🎲</button>
+
+    <!-- Dice Panel (outros jogadores rolando) -->
+    <div id="dice-panel" style="display:none; position:fixed; bottom:100px; right:10px; z-index:1000; background:rgba(0,0,0,0.85); border:1px solid #555; border-radius:6px; padding:8px; min-width:160px; font-size:12px; color:#fff;">
+        <strong style="font-size:13px;">Dados em andamento</strong>
+        <div id="dice-panel-content" style="margin-top:6px;"></div>
+    </div>
+
+    <!-- Mestre Panel -->
+    <div id="mestre-panel" style="display:none; position:fixed; top:10px; right:10px; z-index:1000;"></div>
+
+    <!-- TBS Battle HUD -->
+    <div id="tbs-battle-hud" style="display:none; position:fixed; bottom:0; left:0; right:0; z-index:2000; background:rgba(10,10,20,0.95); border-top:2px solid #666; padding:10px; font-size:13px; color:#fff;">
+        <div id="tbs-hud-combatentes" style="display:flex; gap:12px; overflow-x:auto;"></div>
+        <div id="tbs-hud-acoes" style="margin-top:8px; display:flex; gap:8px;">
+            <button id="tbs-btn-mover"    onclick="FateTBS && FateTBS.selecionarAcao('mover')"   style="background:#1a6e3a; color:#fff; border:none; padding:6px 14px; border-radius:4px; cursor:pointer;">Mover</button>
+            <button id="tbs-btn-atacar"   onclick="FateTBS && FateTBS.selecionarAcao('atacar')"  style="background:#7a1a1a; color:#fff; border:none; padding:6px 14px; border-radius:4px; cursor:pointer;">Atacar</button>
+            <button id="tbs-btn-passar"   onclick="FateTBS && FateTBS.passarTurno()"             style="background:#444;    color:#fff; border:none; padding:6px 14px; border-radius:4px; cursor:pointer;">Passar</button>
+        </div>
+        <div id="tbs-hud-log" style="margin-top:6px; max-height:50px; overflow-y:auto; font-size:11px; color:#aaa;"></div>
+    </div>
+
+    <script>
+        // ---------------------------------------------------------------
+        // Dados rolando — estado compartilhado
+        // ---------------------------------------------------------------
+        window.dadosRolando = window.dadosRolando || {};
+
+        // ---------------------------------------------------------------
+        // cmdAtualizarHUDParty
+        // Atualiza o painel de party com os membros online e seus dados.
+        // Suporta AMBOS os formatos de dado:
+        //   - Novo: { vals: [...], type, active }  (array)
+        //   - Antigo: { val: "?",  type, active }  (valor singular)
+        // ---------------------------------------------------------------
+        window.cmdAtualizarHUDParty = function(membros) {
+            const container = document.getElementById('party-hud-container');
+            if (!container) return;
+
+            if (!membros || membros.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'block';
+            let html = '<div style="font-size:11px;color:#aaa;text-transform:uppercase;margin-bottom:6px;">Grupo</div>';
+
+            membros.forEach(function(nome) {
+                html += '<div style="margin-bottom:8px;">';
+                html += '<span style="font-weight:bold;">' + nome + '</span>';
+
+                // Exibe animação de dado se o jogador estiver rolando
+                if (window.dadosRolando && window.dadosRolando[nome]) {
+                    var dr = window.dadosRolando[nome];
+
+                    // Compatibilidade: aceita tanto { vals:[...] } (novo) quanto { val:"?" } (antigo)
+                    var valsArr = dr.vals || [dr.val !== undefined ? dr.val : '?'];
+
+                    var dadoHtml = '<div style="display:flex; gap:5px; margin-left:15px; margin-right:5px;">';
+                    valsArr.forEach(function(v) {
+                        var cor = '#888';
+                        if (typeof v === 'number') {
+                            cor = v <= 4 ? '#ff4c4c' : v <= 11 ? '#ffffff' : v <= 19 ? '#50c878' : '#ffd700';
+                        }
+                        dadoHtml += '<div style="'
+                            + 'background:rgba(0,0,0,0.6);'
+                            + 'border:1px solid #555;'
+                            + 'border-radius:4px;'
+                            + 'width:28px; height:28px;'
+                            + 'display:flex; align-items:center; justify-content:center;'
+                            + 'font-weight:bold; font-size:13px;'
+                            + 'color:' + cor + ';'
+                            + '">' + v + '</div>';
+                    });
+                    dadoHtml += '</div>';
+                    html += dadoHtml;
+                }
+
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
+        };
+
+        // ---------------------------------------------------------------
+        // Listeners de socket para atualização de dados
+        // Ativados somente quando window.socket estiver disponível.
+        // ---------------------------------------------------------------
+        function _iniciarSocketHUD() {
+            if (!window.socket) return;
+
+            // Evita registrar múltiplas vezes
+            if (window._socketHUDInit) return;
+            window._socketHUDInit = true;
+
+            // Animação de dado iniciada — formato NOVO: { nome, tipo, qtd }
+            window.socket.on('updateDiceAnimation', function(dados) {
+                if (!window.dadosRolando) window.dadosRolando = {};
+                var qtd = dados.qtd || 1;
+                window.dadosRolando[dados.nome] = {
+                    active: true,
+                    type: dados.tipo,
+                    vals: new Array(qtd).fill('?')
+                };
+                _atualizarDicePanel();
+            });
+
+            // Resultado do dado chegou — formato NOVO: { nome, tipo, resultados }
+            window.socket.on('updateDiceResult', function(dados) {
+                if (!window.dadosRolando) window.dadosRolando = {};
+                var resultados = dados.resultados || dados.vals || (dados.val !== undefined ? [dados.val] : []);
+                window.dadosRolando[dados.nome] = {
+                    active: false,
+                    type: dados.tipo,
+                    vals: resultados
+                };
+                _atualizarDicePanel();
+
+                // Remove do painel após 4 segundos
+                setTimeout(function() {
+                    if (window.dadosRolando) delete window.dadosRolando[dados.nome];
+                    _atualizarDicePanel();
+                }, 4000);
+            });
+
+            // Convite de batalha TBS recebido de outro membro da party
+            window.socket.on('combatePartyConvite', function(dados) {
+                if (typeof $gameMessage !== 'undefined') {
+                    $gameMessage.add(dados.de + ' iniciou uma batalha! Deseja ir junto?');
+                    $gameMessage.setChoices(['Sim, ir junto!', 'Não'], 0, 1);
+                    $gameMessage.setChoiceCallback(function(idx) {
+                        if (idx === 0 && window.socket) {
+                            window.socket.emit('aceitarConviteCombate', {
+                                batalhaId: dados.batalhaId,
+                                de: window.jogadorAtual,
+                                servidor: window.salaAtual
+                            });
+                        }
+                    });
+                } else {
+                    // Fallback para ambiente sem RPG Maker
+                    if (confirm(dados.de + ' iniciou uma batalha! Deseja ir junto?')) {
+                        window.socket.emit('aceitarConviteCombate', {
+                            batalhaId: dados.batalhaId,
+                            de: window.jogadorAtual,
+                            servidor: window.salaAtual
+                        });
+                    }
+                }
+            });
+        }
+
+        // Atualiza o painel de dados em andamento (dice-panel)
+        function _atualizarDicePanel() {
+            var panel = document.getElementById('dice-panel-content');
+            if (!panel) return;
+            if (!window.dadosRolando || Object.keys(window.dadosRolando).length === 0) {
+                document.getElementById('dice-panel').style.display = 'none';
+                return;
+            }
+            document.getElementById('dice-panel').style.display = 'block';
+            var html = '';
+            Object.keys(window.dadosRolando).forEach(function(nome) {
+                var dr = window.dadosRolando[nome];
+                var valsArr = dr.vals || [dr.val !== undefined ? dr.val : '?'];
+                html += '<div><strong>' + nome + ':</strong> ' + valsArr.join(', ') + '</div>';
+            });
+            panel.innerHTML = html;
+        }
+
+        // Tenta iniciar os listeners assim que o socket estiver pronto.
+        // Repete a cada 500 ms até conseguir (o socket é criado pelo Fate_TBSCore.js).
+        (function _aguardarSocket() {
+            if (window.socket) {
+                _iniciarSocketHUD();
+            } else {
+                setTimeout(_aguardarSocket, 500);
+            }
+        })();
+
+        // Toggle dice panel
+        var _diceToggleBtn = document.getElementById('dice-toggle-btn');
+        if (_diceToggleBtn) {
+            _diceToggleBtn.addEventListener('click', function() {
+                var p = document.getElementById('dice-panel');
+                if (p) p.style.display = p.style.display === 'none' ? 'block' : 'none';
+            });
+        }
+    </script>
 </body>
 </html>
